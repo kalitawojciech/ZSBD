@@ -9,7 +9,7 @@ BEGIN
 
     INSERT INTO DEPARTMENTS VALUES(NUMBER_MAX, V_NAME, null, null);
 
-    DBMS_OUTPUT.PUT_LINE('Maksymalny numer departamentu wynosi ' || NUMBER_MAX)
+    DBMS_OUTPUT.PUT_LINE('Maksymalny numer departamentu wynosi ' || NUMBER_MAX);
 END;
 
 
@@ -27,7 +27,7 @@ BEGIN
     INSERT INTO DEPARTMENTS VALUES(NUMBER_MAX, V_NAME, null, null);
     UPDATE DEPARTMENTS SET LOCATION_ID = V_LOCATION_ID WHERE DEPARTMENT_ID = NUMBER_MAX;
 
-    DBMS_OUTPUT.PUT_LINE('Maksymalny numer departamentu wynosi ' || NUMBER_MAX)
+    DBMS_OUTPUT.PUT_LINE('Maksymalny numer departamentu wynosi ' || NUMBER_MAX);
 END;
 
 
@@ -96,4 +96,141 @@ END;
 
 -- 7
 DECLARE
-    CURSOR C IS SELECT * FROM EMP WHERE DEPARTMENT_ID = '50';
+    CURSOR C IS SELECT * FROM EMPLOYEES WHERE DEPARTMENT_ID = '50';
+    V_EMPLOYEE EMPLOYEES%ROWTYPE;
+BEGIN
+    OPEN C;
+    LOOP 
+        FETCH C INTO V_EMPLOYEE;
+        IF V_EMPLOYEE.DEPARTMENT_ID IS NOT NULL THEN
+            IF V_EMPLOYEE.SALARY > 3100 THEN
+                DBMS_OUTPUT.PUT_LINE(V_EMPLOYEE.LAST_NAME || ' nie dawac podwyzki');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE(V_EMPLOYEE.LAST_NAME || ' dac podwyzke');
+            END IF;
+        END IF;
+    END LOOP;
+    CLOSE C;
+END;
+
+
+-- 8a
+DECLARE
+    CURSOR C(MIN_SALARY NUMBER, MAX_SALARY NUMBER, NAME VARCHAR)
+    IS SELECT FIRST_NAME, LAST_NAME, SALARY
+    FROM EMPLOYEES
+    WHERE (SALARY BETWEEN MIN_SALARY AND MAX_SALARY) AND LOWER(FIRST_NAME) LIKE LOWER(name);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Pracownicy z zarobkami 1000-5000 z imieniem zawierajcym litere a');
+    FOR EMPL IN C(1000, 5000, '%a%')
+        LOOP
+            DBMS_OUTPUT.PUT_LINE(EMPL.FIRST_NAME || ' ' || EMPL.LAST_NAME || ' ' || EMPL.SALARY);
+        END LOOP;
+END;
+
+
+-- 8b
+DECLARE
+    CURSOR C(MIN_SALARY NUMBER, MAX_SALARY NUMBER, NAME VARCHAR)
+    IS SELECT FIRST_NAME, LAST_NAME, SALARY
+    FROM EMPLOYEES
+    WHERE (SALARY BETWEEN MIN_SALARY AND MAX_SALARY) AND LOWER(FIRST_NAME) LIKE LOWER(name);
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Pracownicy z zarobkami 5000-20000 z imieniem zawierajcym litere u');
+    FOR EMPL IN C(5000, 20000, '%u%')
+        LOOP
+            DBMS_OUTPUT.PUT_LINE(EMPL.FIRST_NAME || ' ' || EMPL.LAST_NAME || ' ' || EMPL.SALARY);
+        END LOOP;
+END;
+
+
+-- 9a
+CREATE OR REPLACE PROCEDURE AddJob(P_JOB_ID VARCHAR2, P_JOB_TITLE VARCHAR2)
+IS
+
+BEGIN
+    INSERT INTO JOBS(JOB_ID, JOB_TITLE) VALUES(P_JOB_ID, P_JOB_TITLE);
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Bledne dane wejsciowe');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+END;
+
+BEGIN
+    AddJob('test 1', 'test 1');
+END;
+
+
+-- 9b
+CREATE OR REPLACE PROCEDURE EditJob(P_JOB_ID VARCHAR2, P_JOB_TITLE VARCHAR2)
+IS
+    V_JOB_ID VARCHAR2;
+
+BEGIN
+    SELECT JOB_ID INTO V_JOB_ID FROM JOBS WHERE JOB_ID = P_JOB_ID;
+
+    UPDATE JOBS SET JOB_TITLE = P_JOB_TITLE WHERE JOB_ID = V_JOB_ID;
+    EXCEPTION
+        WHEN NO_DATA_FOUND OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Bledne dane wejsciowe');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+END;
+
+BEGIN
+    EditJob('test 1', 'test 1');
+END;
+
+
+-- 9c
+CREATE OR REPLACE PROCEDURE RemoveJob(P_JOB_ID)
+IS
+    V_JOB_ID VARCHAR2;
+
+BEGIN
+    SELECT JOB_ID INTO V_JOB_ID FROM JOBS WHERE JOB_ID = P_JOB_ID;
+
+    DELETE JOBS WHERE JOB_ID = V_JOB_ID;
+    EXCEPTION
+        WHEN NO_DATA_FOUND OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Bledne dane wejsciowe');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+END;
+
+BEGIN
+    RemoveJob('test 1');
+END;
+
+
+-- 9d
+CREATE OR REPLACE PROCEDURE GetNameAndSalary(P_EMPLOYEE_ID NUMBER, P_EMPLOYEE_NAME OUT VARCHAR2, P_SALARY OUT NUMBER)
+IS
+    V_JOB_ID VARCHAR2;
+
+BEGIN
+    SELECT FIRST_NAME, SALARY INTO P_EMPLOYEE_NAME, P_SALARY FROM EMPLOYEES WHERE EMPLOYEE_ID = P_EMPLOYEE_ID;
+
+    EXCEPTION
+        WHEN NO_DATA_FOUND OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Bledne dane wejsciowe');
+            DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
+            DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
+END;
