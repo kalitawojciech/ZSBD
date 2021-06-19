@@ -173,7 +173,7 @@ BEGIN
 
     UPDATE JOBS SET JOB_TITLE = P_JOB_TITLE WHERE JOB_ID = V_JOB_ID;
     EXCEPTION
-        WHEN NO_DATA_FOUND OTHERS THEN
+        WHEN NO_DATA_FOUND THEN
             DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
             DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
             DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
@@ -199,7 +199,7 @@ BEGIN
 
     DELETE JOBS WHERE JOB_ID = V_JOB_ID;
     EXCEPTION
-        WHEN NO_DATA_FOUND OTHERS THEN
+        WHEN NO_DATA_FOUND THEN
             DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
             DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
             DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
@@ -224,7 +224,7 @@ BEGIN
     SELECT FIRST_NAME, SALARY INTO P_EMPLOYEE_NAME, P_SALARY FROM EMPLOYEES WHERE EMPLOYEE_ID = P_EMPLOYEE_ID;
 
     EXCEPTION
-        WHEN NO_DATA_FOUND OTHERS THEN
+        WHEN NO_DATA_FOUND THEN
             DBMS_OUTPUT.PUT_LINE('Rekord z id = ' || P_JOB_ID || ' nie istnieje');
             DBMS_OUTPUT.PUT_LINE('Kod bledu ' || SQLCODE);
             DBMS_OUTPUT.PUT_LINE('Komunikat ' || SQLERRM);
